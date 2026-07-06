@@ -1,21 +1,51 @@
 import prisma from "@perpustakaan-be/db";
 import type { Request, Response } from "express";
 
-export const getAllBuku = async (_req: Request, res: Response): Promise<void> => {
+export const getAllBuku = async (req: Request, res: Response): Promise<void> => {
   try {
-    const data = await prisma.buku.findMany({
-      include: {
-        penerbit: true,
-        pengarang: true,
-        klasifikasi: true,
-      },
-    });
-    res.status(200).json(data);
+    const { judul, pengarang, penerbit, klasifikasi, page, limit } = req.query;
+
+    const pageNum = Math.max(1, Number(page) || 1);
+    const limitNum = Math.min(100, Math.max(1, Number(limit) || 20));
+    const skip = (pageNum - 1) * limitNum;
+
+    const where = {
+      ...(judul && {
+        judul: { contains: String(judul).trim() },
+      }),
+      ...(pengarang && {
+        pengarang: { nm_pengarang: { contains: String(pengarang).trim() } },
+      }),
+      ...(penerbit && {
+        penerbit: { nm_penerbit: { contains: String(penerbit).trim() } },
+      }),
+      ...(klasifikasi && {
+        klasifikasi: { nm_klasifikasi: { contains: String(klasifikasi).trim() } },
+      }),
+    };
+
+    const [data, total] = await prisma.$transaction([
+      prisma.buku.findMany({
+        where,
+        include: {
+          penerbit: true,
+          pengarang: true,
+          klasifikasi: true,
+        },
+        skip,
+        take: limitNum,
+        orderBy: { judul: "asc" },
+      }),
+      prisma.buku.count({ where }),
+    ]);
+
+    res.status(200).json({ data, total, page: pageNum, limit: limitNum });
   } catch (error) {
     console.error("Get All Buku error:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
 
 export const getBukuById = async (req: Request, res: Response): Promise<void> => {
   try {

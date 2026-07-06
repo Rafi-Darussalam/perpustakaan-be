@@ -22,6 +22,11 @@ export const login = async (req: Request, res: Response) => {
       return;
     }
 
+    if (!user.status_aktif) {
+      res.status(401).json({ message: "Akun dinonaktifkan" });
+      return;
+    }
+
     const isValidPassword = await bcrypt.compare(password, user.password);
 
     if (!isValidPassword) {

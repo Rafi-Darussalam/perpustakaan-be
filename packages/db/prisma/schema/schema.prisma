@@ -17,6 +17,7 @@ model Penerbit {
 
   buku Buku[]
 
+  @@index([nm_penerbit])
   @@map("PENERBIT")
 }
 
@@ -27,6 +28,7 @@ model Pengarang {
 
   buku Buku[]
 
+  @@index([nm_pengarang])
   @@map("PENGARANG")
 }
 
@@ -36,6 +38,7 @@ model Klasifikasi {
 
   buku Buku[]
 
+  @@index([nm_klasifikasi])
   @@map("KLASIFIKASI")
 }
 
@@ -57,6 +60,10 @@ model Buku {
 
   inventaris Inventaris[]
 
+  @@index([judul])
+  @@index([kd_penerbit])
+  @@index([kd_pengarang])
+  @@index([kd_klasifikasi])
   @@map("BUKU")
 }
 
@@ -94,7 +101,7 @@ model Inventaris {
   tgl_masuk     String
   status_buku   String
 
-  buku Buku @relation(fields: [kd_buku], references: [kd_buku], onUpdate: Cascade, onDelete: Cascade)
+  buku Buku @relation(fields: [kd_buku], references: [kd_buku], onUpdate: Cascade, onDelete: Restrict)
 
   detpinjam Detpinjam[]
   denda     Denda[]
@@ -136,6 +143,7 @@ model Denda {
   no_inventaris Int
   tgl_denda     DateTime
   jmlh_denda    String   @db.VarChar(255)
+  lunas         Boolean  @default(false)
 
   pinjam     Pinjam     @relation(fields: [no_pinjam], references: [no_pinjam], onUpdate: Cascade, onDelete: Cascade)
   inventaris Inventaris @relation(fields: [no_inventaris], references: [no_inventaris], onUpdate: Cascade, onDelete: Cascade)
@@ -151,10 +159,22 @@ enum Role {
 }
 
 model User {
-  id       Int    @id @default(autoincrement())
-  username String @unique
-  password String
-  role     Role   @default(ANGGOTA)
+  id           Int     @id @default(autoincrement())
+  username     String  @unique
+  password     String
+  role         Role    @default(ANGGOTA)
+  status_aktif Boolean @default(true)
+  nama         String?
+  email        String?
+  kontak       String?
 
   @@map("USER")
+}
+
+model Konfigurasi {
+  id    Int    @id @default(autoincrement())
+  kunci String @unique
+  nilai String
+
+  @@map("KONFIGURASI")
 }
