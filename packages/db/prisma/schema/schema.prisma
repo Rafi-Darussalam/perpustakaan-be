@@ -1,0 +1,160 @@
+generator client {
+  provider     = "prisma-client"
+  output       = "../generated"
+  moduleFormat = "esm"
+  runtime      = "nodejs"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+model Penerbit {
+  kd_penerbit Int    @id @default(autoincrement())
+  nm_penerbit String
+  alamat      String
+  telp        String @db.VarChar(50)
+
+  buku Buku[]
+
+  @@map("PENERBIT")
+}
+
+model Pengarang {
+  kd_pengarang  Int    @id @default(autoincrement())
+  nm_pengarang  String
+  jenis_kelamin String
+
+  buku Buku[]
+
+  @@map("PENGARANG")
+}
+
+model Klasifikasi {
+  kd_klasifikasi Int    @id @default(autoincrement())
+  nm_klasifikasi String
+
+  buku Buku[]
+
+  @@map("KLASIFIKASI")
+}
+
+model Buku {
+  kd_buku        Int    @id @default(autoincrement())
+  judul          String
+  kd_penerbit    Int
+  kd_klasifikasi Int
+  thn_terbit     String
+  bahasa         String
+  edisi          String
+  ISBN           String
+  jumlah         String
+  kd_pengarang   Int
+
+  penerbit    Penerbit    @relation(fields: [kd_penerbit], references: [kd_penerbit], onUpdate: Cascade, onDelete: Restrict)
+  klasifikasi Klasifikasi @relation(fields: [kd_klasifikasi], references: [kd_klasifikasi], onUpdate: Cascade, onDelete: Restrict)
+  pengarang   Pengarang   @relation(fields: [kd_pengarang], references: [kd_pengarang], onUpdate: Cascade, onDelete: Restrict)
+
+  inventaris Inventaris[]
+
+  @@map("BUKU")
+}
+
+model Anggota {
+  kd_anggota    Int      @id @default(autoincrement())
+  nm_anggota    String
+  jenis_kelamin String
+  alamat        String   
+  no_telp       String
+  tgl_daftar    DateTime
+
+  pinjam Pinjam[]
+
+  @@map("ANGGOTA")
+}
+
+model Petugas {
+  kd_petugas    Int    @id @default(autoincrement())
+  nm_petugas    String
+  jenis_kelamin String 
+  alamat        String 
+  telp          String 
+  user          String 
+  pass          String
+
+  pinjam Pinjam[]
+
+  @@map("PETUGAS")
+}
+
+model Inventaris {
+  no_inventaris Int    @id @default(autoincrement())
+  kd_buku       Int
+  no_buku       String
+  tgl_masuk     String
+  status_buku   String
+
+  buku Buku @relation(fields: [kd_buku], references: [kd_buku], onUpdate: Cascade, onDelete: Cascade)
+
+  detpinjam Detpinjam[]
+  denda     Denda[]
+
+  @@map("INVENTARIS")
+}
+
+model Pinjam {
+  no_pinjam         Int      @id @default(autoincrement())
+  kd_anggota        Int
+  tgl_pinjam        DateTime
+  tgl_harus_kembali DateTime
+  kd_petugas        Int
+
+  anggota Anggota @relation(fields: [kd_anggota], references: [kd_anggota], onUpdate: Cascade, onDelete: Restrict)
+  petugas Petugas @relation(fields: [kd_petugas], references: [kd_petugas], onUpdate: Cascade, onDelete: Restrict)
+
+  detpinjam Detpinjam[]
+  denda     Denda[]
+
+  @@map("PINJAM")
+}
+
+model Detpinjam {
+  no_pinjam     Int
+  no_inventaris Int
+  tgl_pinjam    DateTime
+  status_pinjam String
+
+  pinjam     Pinjam     @relation(fields: [no_pinjam], references: [no_pinjam], onUpdate: Cascade, onDelete: Cascade)
+  inventaris Inventaris @relation(fields: [no_inventaris], references: [no_inventaris], onUpdate: Cascade, onDelete: Cascade)
+
+  @@id([no_pinjam, no_inventaris])
+  @@map("DETPINJAM")
+}
+
+model Denda {
+  no_pinjam     Int
+  no_inventaris Int
+  tgl_denda     DateTime
+  jmlh_denda    String   @db.VarChar(255)
+
+  pinjam     Pinjam     @relation(fields: [no_pinjam], references: [no_pinjam], onUpdate: Cascade, onDelete: Cascade)
+  inventaris Inventaris @relation(fields: [no_inventaris], references: [no_inventaris], onUpdate: Cascade, onDelete: Cascade)
+
+  @@id([no_pinjam, no_inventaris])
+  @@map("DENDA")
+}
+
+enum Role {
+  PETUGAS
+  ANGGOTA
+  ADMIN
+}
+
+model User {
+  id       Int    @id @default(autoincrement())
+  username String @unique
+  password String
+  role     Role   @default(ANGGOTA)
+
+  @@map("USER")
+}

@@ -1,0 +1,30 @@
+{
+  "name": "perpustakaan-be",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "type": "module",
+  "scripts": {
+    "dev": "pnpm -r dev",
+    "build": "pnpm -r build",
+    "check-types": "pnpm -r check-types",
+    "dev:server": "pnpm --filter server dev",
+    "db:push": "pnpm --filter @perpustakaan-be/db db:push",
+    "db:studio": "pnpm --filter @perpustakaan-be/db db:studio",
+    "db:generate": "pnpm --filter @perpustakaan-be/db db:generate",
+    "db:migrate": "pnpm --filter @perpustakaan-be/db db:migrate"
+  },
+  "dependencies": {
+    "@perpustakaan-be/env": "workspace:*",
+    "dotenv": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@perpustakaan-be/config": "workspace:*",
+    "@types/node": "catalog:",
+    "typescript": "catalog:"
+  },
+  "packageManager": "pnpm@11.10.0"
+}

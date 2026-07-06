@@ -1,0 +1,3 @@
+{
+  "extends": "@perpustakaan-be/config/tsconfig.base.json"
+}
