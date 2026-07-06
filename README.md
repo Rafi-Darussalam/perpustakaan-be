@@ -180,7 +180,7 @@ Format header: `Authorization: Bearer <token_jwt>`
   "tarif_denda": 2000
 }
 ```
-*(Catatan: tipe data harus Integer positif, divalidasi oleh Zod)*
+*(Catatan: tipe data harus Integer positif)*
 
 ---
 
